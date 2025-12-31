@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kas Barang</title>
+<style>
+body { font-family: Arial; background:#f4f4f4; padding:20px }
+.container { background:#fff; padding:20px; max-width:900px; margin:auto; border-radius:8px }
+input, select, button { padding:8px; margin:4px }
+table { width:100%; border-collapse: collapse; margin-top:15px }
+th, td { border:1px solid #ccc; padding:8px; text-align:center }
+th { background:#eee }
+.total { font-weight:bold }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Web Pemasukan & Pengeluaran Barang</h2>
+
+<select id="type">
+  <option value="Pemasukan">Pemasukan</option>
+  <option value="Pengeluaran">Pengeluaran</option>
+</select>
+
+<input type="date" id="date">
+<input type="text" id="item" placeholder="Nama Barang">
+<input type="number" id="qty" placeholder="Jumlah">
+<input type="number" id="price" placeholder="Harga">
+<button onclick="addData()">Tambah</button>
+
+<table>
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Jenis</th>
+<th>Barang</th>
+<th>Jumlah</th>
+<th>Harga</th>
+<th>Total</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table>
+
+<p class="total">Total Pemasukan: Rp <span id="in">0</span></p>
+<p class="total">Total Pengeluaran: Rp <span id="out">0</span></p>
+<p class="total">Saldo: Rp <span id="saldo">0</span></p>
+</div>
+
+<script>
+let records = JSON.parse(localStorage.getItem("kas")) || [];
+
+function render(){
+  let tbody = document.getElementById("data");
+  tbody.innerHTML="";
+  let masuk=0, keluar=0;
+
+  records.forEach((r,i)=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${r.date}</td>
+      <td>${r.type}</td>
+      <td>${r.item}</td>
+      <td>${r.qty}</td>
+      <td>${r.price}</td>
+      <td>${r.total}</td>
+      <td><button onclick="del(${i})">Hapus</button></td>
+    `;
+    tbody.appendChild(tr);
+    r.type=="Pemasukan" ? masuk+=r.total : keluar+=r.total;
+  });
+
+  document.getElementById("in").innerText=masuk;
+  document.getElementById("out").innerText=keluar;
+  document.getElementById("saldo").innerText=masuk-keluar;
+  localStorage.setItem("kas",JSON.stringify(records));
+}
+
+function addData(){
+  let qty=+qtyInput.value;
+  let price=+priceInput.value;
+  records.push({
+    date:date.value,
+    type:type.value,
+    item:item.value,
+    qty,
+    price,
+    total:qty*price
+  });
+  render();
+}
+
+function del(i){
+  records.splice(i,1);
+  render();
+}
+
+const date=document.getElementById("date");
+const type=document.getElementById("type");
+const item=document.getElementById("item");
+const qtyInput=document.getElementById("qty");
+const priceInput=document.getElementById("price");
+
+render();
+</script>
+
+</body>
+</html>
